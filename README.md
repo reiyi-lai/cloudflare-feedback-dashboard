@@ -21,7 +21,17 @@ cd frontend
 npm install
 ```
 
-### 2. Run development servers
+### 2. Set up D1 Database
+
+```bash
+# Create D1 database
+npx wrangler d1 create feedback-db
+
+# Run schema to create tables and seed data
+npx wrangler d1 execute feedback-db --local --file=schema.sql
+```
+
+### 3. Run development servers
 
 ```bash
 npm run dev
@@ -52,7 +62,13 @@ View dashboard at `http://localhost:5173`. API runs at `http://localhost:8787`
 ## Deployment
 
 ```bash
+# Build frontend
+cd frontend
 npm run build
 
+# Deploy to Cloudflare (from root)
 npm run deploy
+
+# Run schema on production database (first time only)
+npx wrangler d1 execute feedback-db --remote --file=schema.sql
 ```
