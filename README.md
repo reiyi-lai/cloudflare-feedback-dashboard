@@ -2,6 +2,39 @@
 
 Dashboard meant to aggregate product feedback from various sources – built with Cloudflare Workers, D1 database, and Workers AI.
 
+## Architecture Overview
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    Cloudflare Workers                        │
+│  ┌─────────────────┐    ┌─────────────────────────────────┐ │
+│  │  Static Assets  │    │         API Routes              │ │
+│  │  (React App)    │    │  /api/feedback - List/filter    │ │
+│  │                 │    │  /api/stats - Aggregations      │ │
+│  │                 │    │  /api/analyze/:id - AI analysis │ │
+│  └─────────────────┘    └─────────────────────────────────┘ │
+└─────────────────────────────────────────────────────────────┘
+           │                         │
+           │                         │
+    ┌──────▼──────┐          ┌───────▼───────┐
+    │     D1      │          │  Workers AI   │
+    │  Database   │          │  (Llama 3.1)  │
+    │             │          │               │
+    │ - feedback  │          │ - Sentiment   │
+    │   table     │          │ - Themes      │
+    │             │          │ - Urgency     │
+    └─────────────┘          └───────────────┘
+```
+
+### Cloudflare Products Used
+
+| Product | Purpose | Why This Choice |
+|---------|---------|-----------------|
+| **Workers** | Hosts API routes and serves static frontend | Serverless, edge-deployed, single deployment for full-stack app |
+| **D1 Database** | Stores feedback entries with filtering/aggregation | Native SQL database, perfect for structured data with complex queries |
+| **Workers AI** | Sentiment analysis, theme extraction, urgency detection | Built-in ML inference, no external API keys needed, runs on Cloudflare's edge |
+| **Static Assets** | Serves the React frontend | Integrated with Workers, automatic asset optimization |
+
 ## Prerequisites
 
 - Node.js (v18+)
@@ -62,13 +95,13 @@ View dashboard at `http://localhost:5173`. API runs at `http://localhost:8787`
 ## Deployment
 
 ```bash
+# Run schema on production database
+npx wrangler d1 execute feedback-db --remote --file=schema.sql
+
 # Build frontend
 cd frontend
 npm run build
 
 # Deploy to Cloudflare (from root)
 npm run deploy
-
-# Run schema on production database (first time only)
-npx wrangler d1 execute feedback-db --remote --file=schema.sql
 ```
