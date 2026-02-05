@@ -194,10 +194,10 @@ export function StatsCards({ stats, loading }: StatsCardsProps) {
       {/* Total Feedback */}
       <div className="stat-card">
         <h3>Total Feedback</h3>
-        <div className="value">{stats.recentCount}</div>
+        <div className="value">{stats.total}</div>
         <div className="breakdown">
           <div className="breakdown-item">
-            <span>in last 7 days</span>
+            <span>All time ({stats.recentCount} in last 7 days)</span>
           </div>
         </div>
       </div>

@@ -14,6 +14,7 @@ interface FiltersProps {
   selectedCount: number;
   onAnalyzeSelected: () => void;
   analyzing: boolean;
+  analyzeProgress?: { current: number; total: number };
 }
 
 export function Filters({
@@ -30,6 +31,7 @@ export function Filters({
   selectedCount,
   onAnalyzeSelected,
   analyzing,
+  analyzeProgress,
 }: FiltersProps) {
   return (
     <div className="filters">
@@ -97,7 +99,11 @@ export function Filters({
         onClick={onAnalyzeSelected}
         disabled={selectedCount === 0 || analyzing}
       >
-        {analyzing ? 'Analyzing...' : `Analyze Selected (${selectedCount})`}
+        {analyzing
+          ? analyzeProgress
+            ? `Analyzing... (${analyzeProgress.current}/${analyzeProgress.total})`
+            : 'Analyzing...'
+          : `Analyze Selected (${selectedCount})`}
       </button>
     </div>
   );

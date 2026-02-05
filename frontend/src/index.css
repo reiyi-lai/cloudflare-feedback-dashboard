@@ -73,6 +73,24 @@ h1 { font-size: 24px; font-weight: 600; margin-bottom: 24px; color: #fff; }
   border-radius: 8px;
   box-shadow: 0 1px 3px rgba(0,0,0,0.1);
   overflow: hidden;
+  position: relative;
+  transition: opacity 0.2s ease;
+}
+
+.feedback-table.loading-pagination::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.5);
+  z-index: 10;
+  pointer-events: none;
+}
+
+.feedback-table.loading-pagination {
+  opacity: 0.7;
 }
 .feedback-header {
   display: grid;
@@ -98,14 +116,6 @@ h1 { font-size: 24px; font-weight: 600; margin-bottom: 24px; color: #fff; }
 .feedback-row:last-child { border-bottom: none; }
 
 
-/* Checkbox */
-.feedback-row input[type="checkbox"],
-.feedback-header input[type="checkbox"] {
-  width: 16px;
-  height: 16px;
-  cursor: pointer;
-  accent-color: #3b82f6;
-}
 
 /* Custom checkbox styling */
 .feedback-row input[type="checkbox"],
@@ -113,14 +123,15 @@ h1 { font-size: 24px; font-weight: 600; margin-bottom: 24px; color: #fff; }
   -webkit-appearance: none;
   -moz-appearance: none;
   appearance: none;
-  width: 16px;
-  height: 16px;
+  width: 18px;
+  height: 18px;
   border: 2px solid #d1d5db;
   border-radius: 4px;
   background: white;
   cursor: pointer;
   position: relative;
   transition: all 0.15s ease;
+  flex-shrink: 0;
 }
 
 .feedback-row input[type="checkbox"]:hover,
@@ -138,13 +149,13 @@ h1 { font-size: 24px; font-weight: 600; margin-bottom: 24px; color: #fff; }
 .feedback-header input[type="checkbox"]:checked::after {
   content: '';
   position: absolute;
-  left: 4px;
-  top: 1px;
+  left: 50%;
+  top: 50%;
   width: 5px;
-  height: 9px;
+  height: 8px;
   border: solid white;
   border-width: 0 2px 2px 0;
-  transform: rotate(45deg);
+  transform: translate(-50%, -60%) rotate(45deg);
 }
 
 /* Source Badge */
@@ -303,6 +314,7 @@ h1 { font-size: 24px; font-weight: 600; margin-bottom: 24px; color: #fff; }
 
 /* Empty state */
 .empty-cell { color: #999; }
+
 
 /* ========== Chart Styles ========== */
 

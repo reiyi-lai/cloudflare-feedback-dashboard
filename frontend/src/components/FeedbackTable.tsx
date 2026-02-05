@@ -4,6 +4,7 @@ import type { Feedback } from "@/types";
 interface FeedbackTableProps {
   feedback: Feedback[];
   loading: boolean;
+  paginationLoading?: boolean;
   selectedIds: number[];
   onSelectionChange: (ids: number[]) => void;
   onAnalyze: (id: number) => void;
@@ -23,6 +24,7 @@ function formatDate(dateStr: string): string {
 export function FeedbackTable({
   feedback,
   loading,
+  paginationLoading,
   selectedIds,
   onSelectionChange,
   onAnalyze,
@@ -71,7 +73,7 @@ export function FeedbackTable({
   }
 
   return (
-    <div className="feedback-table">
+    <div className={`feedback-table ${paginationLoading ? 'loading-pagination' : ''}`}>
       {/* Header */}
       <div className="feedback-header">
         <div>
@@ -183,7 +185,7 @@ export function FeedbackTable({
           <button
             className="page-btn"
             onClick={() => onPageChange(currentPage - 1)}
-            disabled={currentPage <= 1}
+            disabled={currentPage <= 1 || paginationLoading}
           >
             Prev
           </button>
@@ -191,22 +193,21 @@ export function FeedbackTable({
             <input
               type="number"
               className="page-input"
-              defaultValue={currentPage}
-              key={currentPage}
+              value={currentPage}
               min={1}
               max={totalPages}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') {
-                  const page = parseInt((e.target as HTMLInputElement).value);
-                  if (page >= 1 && page <= totalPages) {
-                    onPageChange(page);
-                  }
-                }
-              }}
-              onBlur={(e) => {
-                const page = parseInt(e.target.value);
+              disabled={paginationLoading}
+              onChange={(e) => {
+                const value = e.target.value;
+                if (value === '') return;
+                const page = parseInt(value);
                 if (page >= 1 && page <= totalPages && page !== currentPage) {
                   onPageChange(page);
+                }
+              }}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  e.preventDefault();
                 }
               }}
             />
@@ -215,7 +216,7 @@ export function FeedbackTable({
           <button
             className="page-btn"
             onClick={() => onPageChange(currentPage + 1)}
-            disabled={currentPage >= totalPages}
+            disabled={currentPage >= totalPages || paginationLoading}
           >
             Next
           </button>

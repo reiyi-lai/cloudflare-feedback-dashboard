@@ -16,6 +16,7 @@ function App() {
   // Feedback state
   const [feedback, setFeedback] = useState<Feedback[]>([]);
   const [feedbackLoading, setFeedbackLoading] = useState(true);
+  const [paginationLoading, setPaginationLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
@@ -33,6 +34,7 @@ function App() {
   // Analysis state
   const [analyzingId, setAnalyzingId] = useState<number | null>(null);
   const [bulkAnalyzing, setBulkAnalyzing] = useState(false);
+  const [analyzeProgress, setAnalyzeProgress] = useState({ current: 0, total: 0 });
 
   // Fetch stats
   const fetchStats = useCallback(async () => {
@@ -48,8 +50,14 @@ function App() {
   }, []);
 
   // Fetch feedback
-  const fetchFeedback = useCallback(async (page: number = 1) => {
-    setFeedbackLoading(true);
+  const fetchFeedback = useCallback(async (page: number = 1, isPagination: boolean = false) => {
+    // Only show loading for initial load or filter changes, not pagination
+    if (!isPagination) {
+      setFeedbackLoading(true);
+    } else {
+      setPaginationLoading(true);
+    }
+
     try {
       const params = new URLSearchParams();
       params.set("limit", "20");
@@ -72,6 +80,7 @@ function App() {
       console.error("Failed to fetch feedback:", err);
     } finally {
       setFeedbackLoading(false);
+      setPaginationLoading(false);
     }
   }, [source, sentiment, days, search, urgency]);
 
@@ -88,7 +97,7 @@ function App() {
 
   // Handle page change
   const handlePageChange = (page: number) => {
-    fetchFeedback(page);
+    fetchFeedback(page, true); // true = isPagination
   };
 
   // Analyze single feedback
@@ -118,10 +127,31 @@ function App() {
     if (selectedIds.length === 0) return;
 
     setBulkAnalyzing(true);
+    setAnalyzeProgress({ current: 0, total: selectedIds.length });
+
     try {
-      // Analyze each selected item sequentially
-      for (const id of selectedIds) {
-        await fetch(`${API_BASE}/api/analyze/${id}`, { method: "POST" });
+      // Process in batches of 3 for controlled parallelism
+      const batchSize = 3;
+      let completed = 0;
+
+      for (let i = 0; i < selectedIds.length; i += batchSize) {
+        const batch = selectedIds.slice(i, i + batchSize);
+
+        // Process current batch in parallel
+        const promises = batch.map(id =>
+          fetch(`${API_BASE}/api/analyze/${id}`, { method: "POST" })
+            .then(res => res.json())
+            .catch(err => {
+              console.error(`Failed to analyze ID ${id}:`, err);
+              return { error: true, id };
+            })
+        );
+
+        await Promise.all(promises);
+
+        // Update progress
+        completed += batch.length;
+        setAnalyzeProgress({ current: completed, total: selectedIds.length });
       }
 
       // Refresh data
@@ -133,6 +163,7 @@ function App() {
       alert("Some analyses may have failed");
     } finally {
       setBulkAnalyzing(false);
+      setAnalyzeProgress({ current: 0, total: 0 });
     }
   };
 
@@ -166,11 +197,13 @@ function App() {
         selectedCount={selectedIds.length}
         onAnalyzeSelected={handleAnalyzeSelected}
         analyzing={bulkAnalyzing}
+        analyzeProgress={analyzeProgress}
       />
 
       <FeedbackTable
         feedback={feedback}
         loading={feedbackLoading}
+        paginationLoading={paginationLoading}
         selectedIds={selectedIds}
         onSelectionChange={setSelectedIds}
         onAnalyze={handleAnalyze}
