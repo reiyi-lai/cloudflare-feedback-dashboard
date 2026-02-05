@@ -48,10 +48,10 @@ export function Filters({
       <div className="filter-group">
         <label>Time Period</label>
         <select value={days} onChange={(e) => setDays(e.target.value)}>
-          <option value="7">Last 7 days</option>
-          <option value="1">Last 24 hours</option>
-          <option value="30">Last 30 days</option>
           <option value="">All time</option>
+          <option value="1">Last 24 hours</option>
+          <option value="7">Last 7 days</option>
+          <option value="30">Last 30 days</option>
         </select>
       </div>
 

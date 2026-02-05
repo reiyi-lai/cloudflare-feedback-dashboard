@@ -24,7 +24,7 @@ function App() {
   const [search, setSearch] = useState("");
   const [source, setSource] = useState<Source>("");
   const [sentiment, setSentiment] = useState<Sentiment>("");
-  const [days, setDays] = useState("7");
+  const [days, setDays] = useState("");  // Changed from "7" to "" (All time)
   const [urgency, setUrgency] = useState<Urgency | "">("");
 
   // Selection state
